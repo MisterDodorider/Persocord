@@ -1,0 +1,98 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <AssemblyName>Persocord</AssemblyName>
+    <RootNamespace>Persocord</RootNamespace>
+    <ApplicationIcon>Assets\persocord.ico</ApplicationIcon>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <!-- WFAC010 is a Windows Forms check that wants DPI set in code instead of
+         the manifest. Persocord is a WPF app: WPF fixes the DPI mode before any
+         code runs, so the manifest is the only place it works (see app.manifest). -->
+    <NoWarn>$(NoWarn);WFAC010</NoWarn>
+    <!-- The editor reads decoded sound straight from its files (Services/Residual.cs). -->
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <!-- The version people see (Settings, Apps list, zip name). -->
+    <Version>1.6.40</Version>
+    <InformationalVersion>1.6.40</InformationalVersion>
+    <!-- Who made it and what it is, in the exe's Details tab. Antivirus and
+         Windows' download check trust a program with no such details less. -->
+    <Product>Persocord</Product>
+    <AssemblyTitle>Persocord</AssemblyTitle>
+    <Description>Persocord screen recorder and clip editor</Description>
+    <Company>dodorider</Company>
+    <Authors>dodorider</Authors>
+    <Copyright>Copyright © 2026 dodorider</Copyright>
+    <NeutralLanguage>en</NeutralLanguage>
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+    <!-- Only VLC's 64-bit Windows engine: Persocord never uses the others. -->
+    <VlcWindowsX86Enabled>false</VlcWindowsX86Enabled>
+    <VlcWindowsArm64Enabled>false</VlcWindowsArm64Enabled>
+    <StartupObject>Persocord.Program</StartupObject>
+
+    <!-- Single self-contained exe. Publish with:
+         dotnet publish -c Release -r win-x64 -->
+    <PublishSingleFile>true</PublishSingleFile>
+    <SelfContained>true</SelfContained>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <!-- Uncompressed and precompiled: a bigger exe, but it opens noticeably
+         faster, which matters when opening it means "start recording". -->
+    <EnableCompressionInSingleFile>false</EnableCompressionInSingleFile>
+    <PublishReadyToRun>true</PublishReadyToRun>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="NAudio" Version="2.2.1" />
+    <PackageReference Include="H.NotifyIcon.Wpf" Version="2.1.3" />
+    <!-- The built-in player: VLC's engine, decoding on the graphics card. -->
+    <!-- Exact versions: a package update never changes Persocord by surprise. -->
+    <PackageReference Include="LibVLCSharp.WPF" Version="3.10.1" />
+    <PackageReference Include="VideoLAN.LibVLC.Windows" Version="3.0.21" GeneratePathProperty="true" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- ffmpeg.exe is copied next to the app. See tools/fetch-ffmpeg.ps1 -->
+    <None Update="Assets\ffmpeg.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <!-- Built into the exe so the tray icon cannot go missing after install. -->
+    <None Remove="Assets\persocord.ico" />
+    <EmbeddedResource Include="Assets\persocord.ico" LogicalName="persocord.ico" />
+    <!-- Files from older versions that are no longer part of Persocord. An
+         update unzips over the old folder, so they can still be sitting there;
+         they're left out of the build rather than breaking it. -->
+    <Compile Remove="Views\EditorWindow.cs;Views\ClipPicker.cs" />
+  </ItemGroup>
+
+  <!-- The player's VLC engine is a folder of native files (libvlc.dll and
+       its plugins). The single-file publish doesn't carry it, so it's
+       copied next to the exe: from the build output if the package put it
+       there, otherwise straight from the package. -->
+  <Target Name="PersocordCopyVlc" AfterTargets="Publish">
+    <ItemGroup>
+      <_PersocordVlc Include="$(OutDir)libvlc\win-x64\**\*" />
+      <_PersocordVlcPkg Include="$(PkgVideoLAN_LibVLC_Windows)\build\x64\**\*" Condition="'@(_PersocordVlc)' == ''" />
+    </ItemGroup>
+    <Copy Condition="'@(_PersocordVlc)' != ''" SourceFiles="@(_PersocordVlc)"
+          DestinationFiles="@(_PersocordVlc->'$(PublishDir)libvlc\win-x64\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+    <Copy Condition="'@(_PersocordVlc)' == '' and '@(_PersocordVlcPkg)' != ''" SourceFiles="@(_PersocordVlcPkg)"
+          DestinationFiles="@(_PersocordVlcPkg->'$(PublishDir)libvlc\win-x64\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+    <Warning Condition="'@(_PersocordVlc)' == '' and '@(_PersocordVlcPkg)' == ''" Text="VLC's engine files weren't found; the player will fall back to Windows' player." />
+  </Target>
+  <!-- The license and third-party notices go with every copy (Settings → About opens them). -->
+  <ItemGroup>
+    <None Include="..\..\LICENSE.md" Link="LICENSE.md" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="..\..\THIRD-PARTY-NOTICES.md" Link="THIRD-PARTY-NOTICES.md" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+  </ItemGroup>
+  <!-- The microphone's AI noise suppression model (RNNoise weights, plain text), beside the app. -->
+  <ItemGroup>
+    <None Include="Assets\voice.rnnn" Link="voice.rnnn" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+  </ItemGroup>
+</Project>
