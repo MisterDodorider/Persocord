@@ -12,7 +12,8 @@
 <p align="center">
   <a href="../../releases/latest"><b>⬇ Download the latest version</b></a> ·
   <a href="docs/GUIDE.md">Full guide</a> ·
-  <a href="INSTALL.md">Install help</a>
+  <a href="INSTALL.md">Install help</a> ·
+  <a href="https://discord.gg/uU6sFwAy59">Discord</a>
 </p>
 
 ---
@@ -53,9 +54,11 @@ Everything it can do, with every setting explained, is in the **[full guide](doc
 
 Change them in **Settings → Hotkeys**.
 
-## Something wrong?
+## Bugs, ideas and questions
 
-Open **Settings → About → Diagnostics** and send the report along with what happened. It holds the details needed to track the problem down, and nothing personal.
+**[Join the Discord](https://discord.gg/uU6sFwAy59)** to report bugs, share suggestions, or ask anything.
+
+When reporting a bug, open **Settings → About → Diagnostics** and send the report along with what happened. It holds the details needed to track the problem down, and nothing personal.
 
 ## Building from source
 
