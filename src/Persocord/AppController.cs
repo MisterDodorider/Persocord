@@ -195,6 +195,47 @@ public class AppController
             if (Application.Current is App app) app.Restart(showLibrary: library);
         });
         Refresh.Start();
+
+        // A newer Persocord on GitHub: shown on the clip list only.
+        _ = Updates.CheckAsync();
+        // What an earlier update downloaded, cleared once its installer is surely done.
+        _ = Task.Run(async () => { await Task.Delay(TimeSpan.FromMinutes(2)); Updates.CleanUp(); });
+    }
+
+    /* ---- a new version ------------------------------------------------------ */
+
+    /// <summary>X on the banner: hidden until the next start.</summary>
+    public bool UpdateDismissed { get; set; }
+
+    /// <summary>
+    /// The banner's Update button: downloads and installs the new version
+    /// (closing Persocord for the installer, which opens it again), or opens
+    /// its page when set to (or when there's nothing to download).
+    /// </summary>
+    public async Task UpdateNowAsync()
+    {
+        var release = Updates.Available;
+        if (release == null || Updates.Downloading) return;
+        if (!Settings.Current.UpdateInstallsItself || release.ZipUrl == null)
+        {
+            Updates.OpenPage(release.Page);
+            return;
+        }
+        if (BusyWith() is { } busy) { Updates.Say($"Finish {busy} first, then press Update."); return; }
+
+        var installer = await Updates.DownloadAsync();
+        if (installer == null) return;
+        // Something may have started while it downloaded (a replay save, say).
+        for (int i = 0; i < 120 && BusyWith() != null; i++)
+        {
+            Updates.Say($"Downloaded. Installing once {BusyWith()} is done.");
+            await Task.Delay(1000);
+        }
+        if (BusyWith() is { } still) { Updates.Say($"Finish {still} first, then press Update."); return; }
+
+        Log.Write($"Update: installing {release.Label}");
+        if (!Updates.RunInstaller(installer)) return;
+        if (Application.Current is App app) app.CloseNow("update");
     }
 
     /* ---- the fresh start ---------------------------------------------------- */

@@ -3,6 +3,13 @@
 # Run it for the first install and for every update. Settings live in
 # %APPDATA%\Persocord and clips in their own folder; neither is touched here.
 # No administrator rights are needed: everything goes under your own profile.
+#
+# -Auto is how Persocord runs it for an update it downloaded itself: the new
+# version opens with the clip list when it's done, and if anything goes
+# wrong the current version opens again (untouched) and this window stays
+# open to say why.
+
+param([switch]$Auto)
 
 $ErrorActionPreference = "Stop"
 
@@ -12,6 +19,24 @@ $exe    = Join-Path $target "Persocord.exe"
 $first  = -not (Test-Path $exe)
 
 function Say($text, $colour = "Gray") { Write-Host $text -ForegroundColor $colour }
+
+# Stops here. After an automatic update, the version that was there opens
+# again so you're never left without Persocord.
+function Fail($text) {
+    Say $text Red
+    if ($Auto) {
+        if (Test-Path $exe) { Start-Process $exe -ArgumentList "--library", "--update-failed" }
+        Say ""
+        Say "Persocord is open again." Yellow
+        Read-Host "Press Enter to close this window" | Out-Null
+    }
+    exit 1
+}
+
+# Anything unexpected (a download that broke, say) ends the same way.
+trap { Fail "Something went wrong: $($_.Exception.Message)" }
+
+if ($Auto) { $Host.UI.RawUI.WindowTitle = "Updating Persocord" ; Say "Updating Persocord. This takes a few minutes; it opens again by itself." Green }
 
 # --- 1. close a running copy ------------------------------------------------
 # Asked politely first so it saves on the way out; forced only if it ignores
@@ -82,8 +107,7 @@ else {
         $done = Has-DotNet8
     }
     if (-not $done) {
-        Say "Couldn't install .NET 8 automatically. Get it from https://dotnet.microsoft.com/download/dotnet/8.0 (the SDK), then run this again." Red
-        exit 1
+        Fail "Couldn't install .NET 8 automatically. Get it from https://dotnet.microsoft.com/download/dotnet/8.0 (the SDK), then run this again."
     }
     Say ".NET 8 is ready." Green
 }
@@ -93,8 +117,7 @@ Say "Building. The first build takes a few minutes; later ones are quicker."
 & (Join-Path $PSScriptRoot "build.ps1")
 if ($LASTEXITCODE -ne 0) {
     Say ""
-    Say "The build failed, so nothing was installed and your current copy is untouched." Red
-    exit 1
+    Fail "The build failed, so nothing was installed and your current copy is untouched."
 }
 
 # --- 3. copy into place -------------------------------------------------------
@@ -117,7 +140,7 @@ foreach ($f in $files) {
     for ($i = 0; $i -lt 6; $i++) {
         try { Copy-Item $f.FullName $dest -Force; break }
         catch {
-            if ($i -eq 5) { Say "Could not replace $($f.Name). Is Persocord still open?" Red; exit 1 }
+            if ($i -eq 5) { Fail "Could not replace $($f.Name). Is Persocord still open?" }
             # Still held (a copy that wouldn't close, or an antivirus scan):
             # a file in use can still be renamed, so the old one is moved aside.
             if ($i -eq 2) {
@@ -183,11 +206,14 @@ if ($existing) { Set-ItemProperty $run -Name Persocord -Value "`"$exe`" --tray" 
 # Opening Persocord normally jumps straight to picking an area, which would be
 # a strange thing to pop up after an install. A first install shows the clip
 # list; an update just returns to the tray.
-if ($first) { Start-Process $exe -ArgumentList "--library" }
-else        { Start-Process $exe -ArgumentList "--tray" }
+# After an automatic update the clip list opens, to show it worked.
+if ($Auto)       { Start-Process $exe -ArgumentList "--library", "--updated" }
+elseif ($first)  { Start-Process $exe -ArgumentList "--library" }
+else             { Start-Process $exe -ArgumentList "--tray" }
 
 Say ""
 Say "Persocord $version is installed and running." Green
+if ($Auto) { Start-Sleep -Seconds 3; exit 0 }
 if ($first) {
     Say ""
     Say "To pin it: open Start, type Persocord, right-click it, choose Pin to taskbar." Green

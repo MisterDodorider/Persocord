@@ -260,6 +260,18 @@ Typical use with a graphics-card encoder is 2–5% CPU, 150–300 MB of memory a
 
 ---
 
+## Updates
+
+Every time Persocord starts, it asks GitHub whether a newer version is out. Only the version number is compared; nothing about your PC is sent. When there is one, a bar at the top of the clip list says so. It never shows over a game or anywhere else.
+
+- **Update** downloads it, closes Persocord, installs it and opens it again with the clip list. It takes a few minutes; a window shows the progress. If anything goes wrong, your current version opens again unchanged and the window says why.
+- **What's new** opens the release page with the patch notes.
+- **X** hides the bar until Persocord starts again.
+
+If Persocord is busy (recording, saving a replay, the editor open), Update asks you to finish that first. In **Settings → About** you can make Update open the download page instead, to install it yourself.
+
+---
+
 ## Backing up your settings
 
 Settings → About → **Your settings**:

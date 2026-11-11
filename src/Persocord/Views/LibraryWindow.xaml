@@ -6,6 +6,46 @@
         WindowStartupLocation="CenterScreen"
         Background="{DynamicResource Bezel}" Foreground="{DynamicResource Ink}">
 
+  <DockPanel>
+  <!-- ============ a new version is out ============ -->
+  <!-- Only ever here, in the clip list: never over a game or anything else.
+       Stays until X (back at the next start) or Update. -->
+  <Border x:Name="UpdateBar" DockPanel.Dock="Top" Visibility="Collapsed"
+          Background="{DynamicResource PrimaryFill}" Padding="20,10,12,10">
+    <Border.Resources>
+      <Style x:Key="OnBar" TargetType="Button" BasedOn="{StaticResource Ghost}">
+        <Setter Property="Foreground" Value="{DynamicResource OnBrass}"/>
+      </Style>
+    </Border.Resources>
+    <Grid>
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="Auto"/>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="Auto"/>
+      </Grid.ColumnDefinitions>
+      <TextBlock Grid.Column="0" Text="&#xE896;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="20"
+                 Foreground="{DynamicResource OnBrass}" VerticalAlignment="Center" Margin="0,0,14,0"/>
+      <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,12,0">
+        <TextBlock x:Name="UpdateTitle" FontWeight="SemiBold" FontSize="14.5" Foreground="{DynamicResource OnBrass}"
+                   TextTrimming="CharacterEllipsis"/>
+        <TextBlock x:Name="UpdateText" FontSize="12.5" Foreground="{DynamicResource OnBrass}" Opacity="0.82"
+                   TextWrapping="Wrap" Margin="0,2,0,0"/>
+        <ProgressBar x:Name="UpdateProgress" Height="5" Margin="0,7,0,1" Minimum="0" Maximum="1"
+                     MaxWidth="380" HorizontalAlignment="Stretch" Visibility="Collapsed"/>
+      </StackPanel>
+      <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+        <Button x:Name="UpdateNotes" Content="What's new" Style="{StaticResource OnBar}" Click="UpdateNotes_Click"
+                Margin="0,0,6,0" ToolTip="The release page, with what changed"/>
+        <Button x:Name="UpdateButton" Content="Update" Click="UpdateNow_Click" FontWeight="SemiBold"
+                Padding="18,0" Margin="0,0,6,0"/>
+        <Button x:Name="UpdateClose" Style="{StaticResource OnBar}" Click="UpdateClose_Click" Padding="10,0"
+                ToolTip="Hide until Persocord starts again">
+          <TextBlock Text="&#xE711;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="12"/>
+        </Button>
+      </StackPanel>
+    </Grid>
+  </Border>
+
   <Grid>
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto"/>
@@ -357,4 +397,5 @@
     <!-- The player, over the whole window while a clip plays (Back returns). -->
     <ContentControl x:Name="PlayerHost" Grid.RowSpan="5" Visibility="Collapsed" Panel.ZIndex="50"/>
   </Grid>
+  </DockPanel>
 </Window>

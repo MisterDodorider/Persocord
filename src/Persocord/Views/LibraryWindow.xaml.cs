@@ -285,7 +285,11 @@ public partial class LibraryWindow : Window
         foreach (var label in SortLabels) SortBox.Items.Add(label);
         SortBox.SelectedIndex = (int)_app.Settings.Current.LibrarySort;
 
-        Title = $"Persocord {Paths.AppVersion}";
+        Title = $"Persocord {Updates.CurrentLabel}";
+
+        Updates.Changed += OnUpdates;
+        Closed += (_, _) => Updates.Changed -= OnUpdates;
+        ShowUpdate();
 
         _app.StatusChanged += OnStatus;
         _app.LibraryRefreshed += Refresh;
@@ -313,6 +317,72 @@ public partial class LibraryWindow : Window
     }
 
     private readonly System.Windows.Threading.DispatcherTimer _linkTimer;
+
+    /* ---- a new version ------------------------------------------------------ */
+
+    private void OnUpdates() => Dispatcher.BeginInvoke(new Action(ShowUpdate));
+
+    /// <summary>The banner at the top: a new version, its download, or "updated" right after one.</summary>
+    private void ShowUpdate()
+    {
+        var r = Updates.Available;
+        if (_app.UpdateDismissed || (r == null && !Updates.JustUpdated))
+        {
+            UpdateBar.Visibility = Visibility.Collapsed;
+            return;
+        }
+        UpdateBar.Visibility = Visibility.Visible;
+        UpdateNotes.Visibility = Visibility.Visible;
+
+        if (r == null)
+        {
+            UpdateTitle.Text = $"Persocord is updated to {Updates.CurrentLabel}";
+            UpdateText.Text = "What's new shows everything that changed.";
+            UpdateProgress.Visibility = Visibility.Collapsed;
+            UpdateButton.Visibility = Visibility.Collapsed;
+            UpdateClose.ToolTip = "Close";
+            return;
+        }
+
+        if (Updates.Progress is double p)
+        {
+            UpdateTitle.Text = $"Downloading Persocord {r.Label}... {p:0%}";
+            UpdateText.Text = "Then Persocord closes, installs it and opens again by itself. It takes a few minutes.";
+            UpdateProgress.Visibility = Visibility.Visible;
+            UpdateProgress.Value = p;
+            UpdateButton.Visibility = Visibility.Collapsed;
+            UpdateNotes.Visibility = Visibility.Collapsed;
+            UpdateClose.ToolTip = "Cancel the download";
+            return;
+        }
+
+        bool installs = _app.Settings.Current.UpdateInstallsItself && r.ZipUrl != null;
+        UpdateProgress.Visibility = Visibility.Collapsed;
+        UpdateButton.Visibility = Visibility.Visible;
+        UpdateButton.Content = installs ? "Update" : "Download";
+        UpdateClose.ToolTip = "Hide until Persocord starts again";
+        UpdateTitle.Text = $"Persocord {r.Label} is out";
+        UpdateText.Text = Updates.Problem
+            ?? (Updates.LastTryFailed ? $"The last update didn't finish, so you still have {Updates.CurrentLabel}. Press Update to try again."
+                : installs ? $"You have {Updates.CurrentLabel}. Update installs it and reopens Persocord."
+                : $"You have {Updates.CurrentLabel}. Download opens its page.");
+    }
+
+    private async void UpdateNow_Click(object sender, RoutedEventArgs e)
+    {
+        try { await _app.UpdateNowAsync(); }
+        catch (Exception ex) { Log.Error("update", ex); Updates.Say("The update didn't work. Use What's new to get it by hand."); }
+    }
+
+    private void UpdateNotes_Click(object sender, RoutedEventArgs e) =>
+        Updates.OpenPage(Updates.Available?.Page ?? Updates.ReleasesPage);
+
+    private void UpdateClose_Click(object sender, RoutedEventArgs e)
+    {
+        if (Updates.Downloading) { Updates.CancelDownload(); return; }
+        _app.UpdateDismissed = true;
+        ShowUpdate();
+    }
     private readonly System.Windows.Threading.DispatcherTimer _setupTimer = new() { Interval = TimeSpan.FromMilliseconds(300) };
 
     /// <summary>The "setting up" bar over the clips, while Persocord is still getting ready after starting.</summary>

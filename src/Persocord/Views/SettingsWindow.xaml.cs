@@ -1057,6 +1057,7 @@ public partial class SettingsWindow : Window
         TxtCrf.Text = s.QualityCq.ToString();
 
         CmbOpenAction.SelectedIndex = s.OpenAction == OpenAction.ClipList ? 1 : 0;
+        CmbUpdateMode.SelectedIndex = s.UpdateInstallsItself ? 0 : 1;
 
         ChkCues.IsChecked = s.PlaySounds;
         SldCueVolume.Value = s.CueVolume;
@@ -1184,6 +1185,8 @@ public partial class SettingsWindow : Window
     }
 
     /// <summary>The first-run setup again. Settings closes first, so it can't save over what the setup chooses.</summary>
+    private void GitHub_Click(object sender, RoutedEventArgs e) => Updates.OpenPage(Updates.RepoPage);
+
     private void RunSetup_Click(object sender, RoutedEventArgs e)
     {
         Close();
@@ -1375,6 +1378,7 @@ public partial class SettingsWindow : Window
         if (_linkView != null) s.LinkDefaults = _linkView.Choice;
         s.UploadAfterRecording = ChkUploadAfter.IsChecked == true;
         s.OpenAction = CmbOpenAction.SelectedIndex == 1 ? OpenAction.ClipList : OpenAction.SelectArea;
+        s.UpdateInstallsItself = CmbUpdateMode.SelectedIndex != 1;
         // Cue choices are written straight into the draft as they change.
         s.StartWithWindows = ChkStartup.IsChecked == true;
         s.MicNoiseGate = ChkMicGate.IsChecked == true;

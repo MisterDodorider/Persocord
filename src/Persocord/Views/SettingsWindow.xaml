@@ -716,9 +716,23 @@
             </StackPanel>
             <TextBlock Style="{StaticResource Meta}" TextWrapping="Wrap" Margin="0,14,0,0"
                        Text="Clip your screen, trim it, and get it into Discord in seconds."/>
-            <Button Content="Re-setup" Click="RunSetup_Click" HorizontalAlignment="Left" Margin="0,12,0,0"
-                    Tag="setup re-setup onboarding tutorial welcome first run wizard"
-                    ToolTip="The first-time setup again. It shows your current settings; only what you change there changes."/>
+            <WrapPanel Margin="0,12,0,0">
+              <Button Content="Re-setup" Click="RunSetup_Click" Margin="0,0,8,0"
+                      Tag="setup re-setup onboarding tutorial welcome first run wizard"
+                      ToolTip="The first-time setup again. It shows your current settings; only what you change there changes."/>
+              <Button Content="GitHub page" Click="GitHub_Click" Style="{StaticResource Ghost}"
+                      Tag="github source code releases download website"
+                      ToolTip="Persocord's page: downloads, every version and the source"/>
+            </WrapPanel>
+
+            <Label Content="When a new version is out" Margin="0,18,0,0"/>
+            <ComboBox x:Name="CmbUpdateMode" Width="320" HorizontalAlignment="Left"
+                      Tag="update updates new version download install upgrade">
+              <ComboBoxItem Content="Update installs it for me"/>
+              <ComboBoxItem Content="Update opens the download page"/>
+            </ComboBox>
+            <TextBlock Style="{StaticResource Meta}" TextWrapping="Wrap" Margin="0,6,0,0"
+                       Text="Persocord checks every time it starts. A new version shows as a bar on the clip list, never over a game."/>
 
             <Border Background="{DynamicResource Panel}" CornerRadius="10" Padding="16,12,16,12"
                     Margin="0,22,0,0" HorizontalAlignment="Left">

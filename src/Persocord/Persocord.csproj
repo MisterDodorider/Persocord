@@ -20,6 +20,8 @@
     <!-- The version people see (Settings, Apps list, zip name). -->
     <Version>1.6.40</Version>
     <InformationalVersion>1.6.40</InformationalVersion>
+    <!-- Built from a Git folder, .NET adds the commit to the version ("1.6.40+5925221..."). -->
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
     <!-- Who made it and what it is, in the exe's Details tab. Antivirus and
          Windows' download check trust a program with no such details less. -->
     <Product>Persocord</Product>

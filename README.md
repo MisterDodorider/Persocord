@@ -37,7 +37,7 @@ Everything it can do, with every setting explained, is in the **[full guide](doc
 3. Wait until it's done. The first time takes a few minutes, as it downloads what it needs by itself (.NET 8 and FFmpeg).
 4. Persocord opens with a short setup. After that it lives in your tray.
 
-**Updating:** download the new release and run **Install Persocord.bat** again. Your clips and settings are kept.
+**Updating:** when a new version is out, a bar at the top of the clip list says so. Press **Update** and Persocord installs it and opens again by itself. Your clips and settings are kept. (Running a newer **Install Persocord.bat** by hand works too.)
 
 ### Requirements
 

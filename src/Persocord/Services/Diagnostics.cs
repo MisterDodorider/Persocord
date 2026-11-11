@@ -39,6 +39,8 @@ public static class Diagnostics
         H("Persocord right now");
         await Try("Health", () => { L(Health.Snapshot()); return Task.CompletedTask; });
         if (app.Refresh is { } refresh) L("Fresh start: " + refresh.Describe());
+        L($"Updates: {Updates.Status}" + (Updates.Available is { } up ? $"; {up.Label} is out" : "") +
+          $"; Update {(app.Settings.Current.UpdateInstallsItself ? "installs it" : "opens the page")}");
 
         H("FFmpeg");
         await Try("FFmpeg", async () =>

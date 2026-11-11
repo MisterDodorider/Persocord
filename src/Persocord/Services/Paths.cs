@@ -9,11 +9,11 @@ public static class Paths
 
     /// <summary>Persocord's version as shown to people (e.g. 1.0.01).</summary>
     public static string AppVersion { get; } =
-        (System.Reflection.Assembly.GetExecutingAssembly()
+        ((System.Reflection.Assembly.GetExecutingAssembly()
             .GetCustomAttributes(typeof(System.Reflection.AssemblyInformationalVersionAttribute), false)
             is { Length: > 0 } a ? ((System.Reflection.AssemblyInformationalVersionAttribute)a[0]).InformationalVersion : null)
         ?? System.Reflection.Assembly.GetExecutingAssembly().GetName().Version?.ToString(3)
-        ?? "";
+        ?? "").Split('+')[0];   // a build from a Git folder adds "+" and the commit
 
     private static string Init()
     {

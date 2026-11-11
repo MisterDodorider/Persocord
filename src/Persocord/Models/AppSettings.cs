@@ -400,6 +400,13 @@ public class AppSettings
     /// </summary>
     public OpenAction OpenAction { get; set; } = OpenAction.ClipList;
 
+    /// <summary>
+    /// What the Update button on the new-version banner does: download and
+    /// install it (Persocord closes and reopens by itself), or, switched off,
+    /// open the release page to get it by hand.
+    /// </summary>
+    public bool UpdateInstallsItself { get; set; } = true;
+
     // ---- sound cues -------------------------------------------------
     /// <summary>Master switch for every cue below.</summary>
     public bool PlaySounds { get; set; } = true;

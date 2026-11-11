@@ -96,6 +96,10 @@ public partial class App : Application
         try { ThemeApplier.Apply(Resources.MergedDictionaries[0], LookStore.Current); }
         catch (Exception ex) { Log.Error("theme", ex); }
 
+        // Opened by the installer after an update (or after one that didn't finish).
+        Updates.JustUpdated = e.Args.Any(a => a.Equals("--updated", StringComparison.OrdinalIgnoreCase));
+        Updates.LastTryFailed = e.Args.Any(a => a.Equals("--update-failed", StringComparison.OrdinalIgnoreCase));
+
         // The tray first, so anything Startup reports has somewhere to appear.
         BuildTray();
         _controller.Startup();
@@ -141,15 +145,23 @@ public partial class App : Application
             Log.Error("restart", ex);
             return;
         }
-        // The new copy waits for this one to be gone. If closing ever hangs,
-        // this copy ends itself after 15 seconds, like End task would, so the
-        // restart always happens (its FFmpegs end with it).
+        // The new copy waits for this one to be gone.
+        CloseNow("restart");
+    }
+
+    /// <summary>
+    /// Closes this copy for something that needs it gone (a restart, an
+    /// update). If closing ever hangs, it ends itself after 15 seconds, like
+    /// End task would, so what's waiting always happens (its FFmpegs end with it).
+    /// </summary>
+    public void CloseNow(string why)
+    {
         var watchdog = new Thread(() =>
         {
             Thread.Sleep(15000);
-            try { Log.Write("Restart: closing took too long; ended at once"); } catch { }
+            try { Log.Write($"Closing for {why} took too long; ended at once"); } catch { }
             try { System.Diagnostics.Process.GetCurrentProcess().Kill(); } catch { }
-        }) { IsBackground = true, Name = "Persocord restart watchdog" };
+        }) { IsBackground = true, Name = "Persocord close watchdog" };
         watchdog.Start();
         _controller?.Shutdown();
         _tray?.Dispose();
