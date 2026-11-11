@@ -1,12 +1,2 @@
-# Windows line endings for Windows files, so Git never rewrites them back and forth.
+# Auto detect text files and perform LF normalization
 * text=auto
-*.bat text eol=crlf
-*.ps1 text eol=crlf
-*.cs  text eol=crlf
-*.xaml text eol=crlf
-*.csproj text eol=crlf
-*.manifest text eol=crlf
-*.md  text eol=crlf
-*.png binary
-*.ico binary
-*.rnnn text
