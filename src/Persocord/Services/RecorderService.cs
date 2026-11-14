@@ -1082,11 +1082,16 @@ public class RecorderService
 
         if (ddagrab)
         {
+            // Grabbed faster than the video's rate, then exactly _fps kept
+            // (see CaptureChip.GrabRate). The first-frame report comes before
+            // that step, so the clock and sound start the moment picture does.
             string grab =
-                $"ddagrab=output_idx={_dda!.Output}:framerate={_fps}" +
+                $"ddagrab=output_idx={_dda!.Output}:framerate={CaptureChip.GrabRate(_fps)}" +
                 $":video_size={_capture.Width}x{_capture.Height}" +
                 $":offset_x={_capture.X}:offset_y={_capture.Y}" +
-                $":draw_mouse={(s.ShowCursor ? 1 : 0)}";
+                $":draw_mouse={(s.ShowCursor ? 1 : 0)}" +
+                (probe ? ",showinfo=checksum=0" : "") +
+                $",fps={_fps}";
 
             // On the GPU route frames never leave the graphics card. Otherwise
             // they come off it once and are converted here.
@@ -1100,7 +1105,7 @@ public class RecorderService
         // showinfo passes frames straight through, reporting each one. Only
         // the first report is used. (A side branch that stopped after one
         // frame was tidier, but it crashes FFmpeg 8's filter scheduler.)
-        string graph = probe ? $"{chain},showinfo=checksum=0[v]" : $"{chain}[v]";
+        string graph = probe && !ddagrab ? $"{chain},showinfo=checksum=0[v]" : $"{chain}[v]";
 
         a.Append($"-filter_complex \"{graph}\" -map \"[v]\" -an ");
 

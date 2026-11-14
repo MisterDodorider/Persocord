@@ -18,8 +18,8 @@
     <!-- The editor reads decoded sound straight from its files (Services/Residual.cs). -->
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <!-- The version people see (Settings, Apps list, zip name). -->
-    <Version>1.6.41</Version>
-    <InformationalVersion>1.6.41</InformationalVersion>
+    <Version>1.6.50</Version>
+    <InformationalVersion>1.6.50</InformationalVersion>
     <!-- Who made it and what it is, in the exe's Details tab. Antivirus and
          Windows' download check trust a program with no such details less. -->
     <Product>Persocord</Product>

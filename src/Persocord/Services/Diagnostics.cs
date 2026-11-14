@@ -269,7 +269,7 @@ public static class Diagnostics
             "Replay on", "Replay save", "Replay health", "Saved replay check", "Replay stopped", "Replay video stopped", "Replay sound stopped", "Replay:", "Editor sound", "Player: ", "Sound track for", "No sound has come through", "joins Other apps", "runs as administrator", "Administrator sound helper", "through the administrator helper", "administrator sound",
             "Replay video started", "Replay trimmed", "Encoders", "Encoder test failed", "ERROR", "FATAL", "Refresh:", "Game detected", "Game closed", "Game added", "failed", "closed unexpectedly", "Windows crash report", "Idle:", "Memory:", "Compress", "shrink",
             "Limits for FFmpeg", "Video memory", "No sound has come through", "Sound is waiting", "started (", "exited",
-            "Health: ", "timeline render", "Replace:", "Edit saved", "save edit", "keep edit", "open saved edit", "Editor:", "Recording:", "Recording sound", "Audiodg", "administrator sound", "ffmpeg (segment)", "no usable segments", "Capture failed", "GPU route", "Fast GPU capture", "First-frame report",
+            "Health: ", "timeline render", "Replace:", "Edit saved", "Edit save:", "Instant save", "ffmpeg (edit) failed", "Graphics-card edit failed", "GPU edit failed", "save edit", "keep edit", "open saved edit", "Editor:", "Recording:", "Recording sound", "Audiodg", "administrator sound", "ffmpeg (segment)", "no usable segments", "Capture failed", "GPU route", "Fast GPU capture", "First-frame report",
         };
         // An entry's own lines follow it without a time (FFmpeg's reasons,
         // say): they come along, a few at most, so failures show why.

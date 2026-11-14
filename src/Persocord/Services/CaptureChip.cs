@@ -100,4 +100,18 @@ public static class CaptureChip
         try { File.WriteAllLines(File_, m.Select(kv => $"{kv.Key}={kv.Value:x4}")); }
         catch (Exception ex) { Log.Error("capture chip", ex); }
     }
+
+    /// <summary>
+    /// How often the screen is grabbed for a video of <paramref name="fps"/>
+    /// frames a second; FFmpeg's fps filter then keeps exactly that many.
+    /// Grabbing at just the video's rate missed a frame every so often: the
+    /// capture paces itself by sleeping, and Windows gives FFmpeg a coarse
+    /// sleep (about 15.6 ms against a 16.7 ms frame), so with any extra work
+    /// a frame came too late and the one before was shown twice (measured:
+    /// 14-20% of frames repeated while playing, about 5% grabbing at 240).
+    /// Grabbing faster, it wakes the moment the game draws a new picture.
+    /// At most 480: above that FFmpeg's wait for a picture rounds to nothing
+    /// and it would spin the CPU.
+    /// </summary>
+    public static int GrabRate(int fps) => Math.Clamp(fps * 4, 240, 480);
 }

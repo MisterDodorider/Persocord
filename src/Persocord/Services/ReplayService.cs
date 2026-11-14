@@ -739,8 +739,13 @@ public sealed class ReplayService : IDisposable
         // The video is captured exactly as it always was. Its timestamps are
         // untouched: the pass-through below only prints the real time of the
         // first frame (RTCTIME, on the same clock as the sound's start), once.
-        string grab = $"ddagrab=output_idx={screen.Output}:framerate={fps}:draw_mouse={(s.ReplayCursor ? 1 : 0)}," +
-                      "setpts='PTS+0*if(eq(N\\,0)\\,print(RTCTIME)\\,0)'";
+        // Grabbed faster than the video's rate, then exactly fps kept (see
+        // CaptureChip.GrabRate): frames no longer come out shown twice. The
+        // first frame's real time is printed before that step, at the moment
+        // it was captured, and it stays the video's first frame.
+        string grab = $"ddagrab=output_idx={screen.Output}:framerate={CaptureChip.GrabRate(fps)}:draw_mouse={(s.ReplayCursor ? 1 : 0)}," +
+                      "setpts='PTS+0*if(eq(N\\,0)\\,print(RTCTIME)\\,0)'" +
+                      $",fps={fps}";
         _gateUs = gateUs;
         _fps = fps;
         _vfirstUs = null;
@@ -945,6 +950,10 @@ public sealed class ReplayService : IDisposable
                     return;
                 }
             }
+            // The loop's own note for every piece it writes ("Opening 'seg….m4s'
+            // for writing", twice every 2 s) isn't a reason for anything, and it
+            // pushed the real one (why the capture stopped) out of the log.
+            if (e.Data.Contains("for writing", StringComparison.Ordinal) && e.Data.Contains("Opening '", StringComparison.Ordinal)) return;
             lock (errors)
             {
                 errors.AppendLine(e.Data);
